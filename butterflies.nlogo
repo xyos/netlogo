@@ -1,60 +1,89 @@
-globals [ q ] ; q is the probability that butterfly moves
-; directly to the highest surrounding patch
-patches-own[ elevation used? ]
-turtles-own[ start-patch ]
+globals
+[
+;  num-butterflies
+;  q
+;  no-pen?
+;  pivot
+]
+
+patches-own
+[
+  elevation
+  used?
+]
+
+turtles-own
+[
+  start-patch
+]
+
 to setup
   ca
-  ; Assign an elevation to patches and color them by it
+  
+  file-open "ElevationData.txt"
+  while [not file-at-end?] ;ask patches
+  [
+;    let elev1 100 - distancexy 30 30
+;    let elev2 50 - distancexy 120 100
+;    
+;    ifelse elev1 > elev2
+;    [set elevation elev1 ];+ random 15 ]
+;    [set elevation elev2 ];+ random 15 ]
+    
+    let next-X file-read
+    let next-Y file-read
+    let next-elevation file-read
+    ask patch next-X next-Y
+    [
+      set elevation next-elevation
+      set used? false
+    ]
+  ]
+  
+  let min-elevation min [elevation] of patches
+  let max-elevation max [elevation] of patches
   ask patches
   [
-    ; Elevation decreases linearly with distance from the
-    ; center of hills. Hills are at (30, 30) and
-    ; (120, 100). The first hill is 100 units high.
-    ; The second hill is 50 units high.
-    let elev1 100 - distancexy 30 30
-    let elev2 50 - distancexy 120 100
-    ifelse elev1 > elev2
-      [set elevation elev1]
-      [set elevation elev2]
-    set pcolor scale-color green elevation 0 100
-    set used? false
-  ] ; end of "ask patches"
-  ; Create just 1 butterfly for now
-  crt 1
-  [
-    set size 2
-    ; Set initial location of butterflies
-    setxy 85 95
-    pen-down
-    set start-patch patch-here
+    set pcolor scale-color green elevation min-elevation max-elevation      
   ]
-  ; Initialize the "q" parameter
-  set q 0.4
-  reset-ticks
-end ; of setup procedure
 
-to go ; This is the master schedule
+  file-close
+  
+crt num-butterflies
+  [
+   set size 2
+   setxy pivot + (random 10) pivot + (random 10) 
+   if no-pen? = false
+   [pen-down]
+   set start-patch patch-here
+  ]
+  reset-ticks
+end
+
+to go
   ask turtles [move]
+  plot corridor-width
   tick
   if ticks >= 1000
   [
     let final-corridor-width corridor-width
     write "Corridor width: " print final-corridor-width
-    ;export-plot "Corridor width" (word "Corridor-width-output-for-q-" q ".csv")
+    export-plot "Corridor width" (word "Corridor-width-output-for-q-" q ".csv")
     stop
   ]
 end
 
-to move ; The butterfly move procedure, in turtle context
-  if elevation >= [elevation] of max-one-of neighbors [elevation]
-    [stop]
-  ; Decide whether to move to the highest
-  ; surrounding patch with probability q
-  ifelse random-float   1 < q
-    [ uphill elevation ] ; Move deterministically uphill
-    [ move-to one-of neighbors ] ; Or move randomly
+to move
+  
   set used? true
-end ; of move procedure
+  
+;  if elevation >= [elevation] of max-one-of neighbors [elevation]
+;  [stop]
+  
+  ifelse random-float 1 < q
+  [ uphill elevation ]
+  [ move-to one-of neighbors ]
+end
 
 to-report corridor-width
   let num-used-patches count patches with [ used? = true ]
@@ -65,24 +94,24 @@ end
 GRAPHICS-WINDOW
 210
 10
-1424
-1245
-150
-150
-4.0
+670
+491
+-1
+-1
+3.0
 1
 10
 1
 1
 1
 0
+0
+0
 1
-1
-1
--150
-150
--150
-150
+0
+149
+0
+149
 0
 0
 1
@@ -122,6 +151,68 @@ NIL
 NIL
 NIL
 1
+
+INPUTBOX
+55
+218
+210
+278
+num-butterflies
+30
+1
+0
+Number
+
+INPUTBOX
+48
+291
+203
+351
+pivot
+30
+1
+0
+Number
+
+SWITCH
+53
+420
+156
+453
+no-pen?
+no-pen?
+0
+1
+-1000
+
+INPUTBOX
+51
+504
+206
+564
+q
+0.4
+1
+0
+Number
+
+PLOT
+1206
+120
+1406
+270
+Corridor Width
+ticks
+width
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot count turtles"
 
 @#$#@#$#@
 #Butterfly Model ODD Description
