@@ -1,7 +1,7 @@
 globals [ q ] ; q is the probability that butterfly moves
 ; directly to the highest surrounding patch
-patches-own[ elevation ]
-turtles-own[ ]
+patches-own[ elevation used? ]
+turtles-own[ start-patch ]
 to setup
   ca
   ; Assign an elevation to patches and color them by it
@@ -11,12 +11,13 @@ to setup
     ; center of hills. Hills are at (30, 30) and
     ; (120, 100). The first hill is 100 units high.
     ; The second hill is 50 units high.
-    let elev1 50 - distancexy 30 30
+    let elev1 100 - distancexy 30 30
     let elev2 50 - distancexy 120 100
     ifelse elev1 > elev2
       [set elevation elev1]
       [set elevation elev2]
     set pcolor scale-color green elevation 0 100
+    set used? false
   ] ; end of "ask patches"
   ; Create just 1 butterfly for now
   crt 1
@@ -25,6 +26,7 @@ to setup
     ; Set initial location of butterflies
     setxy 85 95
     pen-down
+    set start-patch patch-here
   ]
   ; Initialize the "q" parameter
   set q 0.4
@@ -34,8 +36,15 @@ end ; of setup procedure
 to go ; This is the master schedule
   ask turtles [move]
   tick
-  if ticks >= 1000 [stop]
+  if ticks >= 1000
+  [
+    let final-corridor-width corridor-width
+    write "Corridor width: " print final-corridor-width
+    ;export-plot "Corridor width" (word "Corridor-width-output-for-q-" q ".csv")
+    stop
+  ]
 end
+
 to move ; The butterfly move procedure, in turtle context
   if elevation >= [elevation] of max-one-of neighbors [elevation]
     [stop]
@@ -44,16 +53,23 @@ to move ; The butterfly move procedure, in turtle context
   ifelse random-float   1 < q
     [ uphill elevation ] ; Move deterministically uphill
     [ move-to one-of neighbors ] ; Or move randomly
+  set used? true
 end ; of move procedure
+
+to-report corridor-width
+  let num-used-patches count patches with [ used? = true ]
+  let mean-distances mean [distance start-patch] of turtles
+  report num-used-patches / mean-distances
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
 10
-1210
-791
-49
-37
-10.0
+1424
+1245
+150
+150
+4.0
 1
 10
 1
@@ -63,10 +79,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--49
-49
--37
-37
+-150
+150
+-150
+150
 0
 0
 1
