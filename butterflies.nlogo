@@ -37,6 +37,8 @@ to go ; This is the master schedule
   if ticks >= 1000 [stop]
 end
 to move ; The butterfly move procedure, in turtle context
+  if elevation >= [elevation] of max-one-of neighbors [elevation]
+    [stop]
   ; Decide whether to move to the highest
   ; surrounding patch with probability q
   ifelse random-float   1 < q
