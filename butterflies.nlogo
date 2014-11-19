@@ -158,7 +158,7 @@ INPUTBOX
 210
 278
 num-butterflies
-30
+25
 1
 0
 Number
@@ -169,7 +169,7 @@ INPUTBOX
 203
 351
 pivot
-30
+50
 1
 0
 Number
@@ -181,7 +181,7 @@ SWITCH
 453
 no-pen?
 no-pen?
-0
+1
 1
 -1000
 
@@ -197,10 +197,10 @@ q
 Number
 
 PLOT
-1206
+823
 120
 1406
-270
+501
 Corridor Width
 ticks
 width
